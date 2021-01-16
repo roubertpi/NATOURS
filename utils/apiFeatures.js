@@ -4,7 +4,8 @@ class APIFeatures {
       this.queryString = queryString;
     }
   
-    filter() {
+    filter() {  
+      const queryObj = { ...this.queryString };
       const excludedFields = ['page', 'sort', 'limit', 'fields'];
       excludedFields.forEach((el) => delete queryObj[el]);
       
@@ -12,17 +13,17 @@ class APIFeatures {
       queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => `$${match}`);
       console.log(JSON.parse(queryStr));
       
-      this.query.find(JSON.parse(queryStr));
+      this.query= this.query.find(JSON.parse(queryStr));
       return this;
       //let query = Tour.find(JSON.parse(queryStr));
     }
   
     sort(){
       if (this.queryString.sort) {
-        const sortby = this.queryString.split(',').join(' ');
-        console.log(sortby);
-  
+        const sortby = this.queryString.sort.split(',').join(' ');
         this.query = this.query.sort(sortby);
+        console.log(sortby);
+
       } else {
         this.query = this.query.sort('-createdAt');
       }

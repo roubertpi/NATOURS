@@ -20,14 +20,14 @@ exports.getAllTours = async (req, res) => {
     //Send Responde
     res.status(200).json({
       status: 'success',
-      requestdAt: req.requestTime,
       results: tours.length,
       data: {
-        tours,
-      },
+        tours
+      }
     });
   } catch (err) {
-    res.status(400).json({
+    console.log(err);
+    res.status(404).json({
       status: 'fail',
       message: err,
     });
