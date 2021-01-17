@@ -9,6 +9,7 @@ router
   .get(tourController.aliasTopTour, tourController.getAllTours);
 
 router.route('/tour-stats').get(tourController.getTurStats);
+router.route('/monthly-plan/:year').get(tourController.getMonthlyPlan);
 
 router
   .route('/')
