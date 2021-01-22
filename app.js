@@ -22,7 +22,7 @@ app.use (express.static(`${__dirname}/public`));
 
 
 app.use ((req,res, next)=>{
-  console.log('teste ok');
+  req.requestTime= new Date().toString();
   next();
 });
 
@@ -31,7 +31,7 @@ app.use('/api/v1/tours',tourRouter);
 app.use('/api/v1/users',userRouter);
 
 app.all('*',(req,res,next)=>{
-  next(new AppError (`Can't find ${req.originalUrl} on this server!`));
+  next(new AppError (`Can't find ${req.originalUrl} on this server!`,404));
 });
 
 app.use (globalErrorHandler);
