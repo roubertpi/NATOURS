@@ -5,11 +5,11 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
 // eslint-disable-next-line arrow-body-style
-const signToken = id => {
+const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '5000'
+    expiresIn: '90d',
   });
-}
+};
 
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
@@ -17,7 +17,7 @@ const createSendToken = (user, statusCode, res) => {
     expires: new Date(
       Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000
     ),
-    httpOnly: true
+    httpOnly: true,
   };
   if (process.env.NODE_ENV === 'production') cookieOptions.secure = true;
 
@@ -30,8 +30,8 @@ const createSendToken = (user, statusCode, res) => {
     status: 'success',
     token,
     data: {
-      user
-    }
+      user,
+    },
   });
 };
 exports.signup = catchAsync(async (req, res, next) => {
@@ -39,12 +39,12 @@ exports.signup = catchAsync(async (req, res, next) => {
     name: req.body.name,
     email: req.body.email,
     password: req.body.password,
-    passwordConfirm: req.body.passwordConfirm
+    passwordConfirm: req.body.passwordConfirm,
+    role:req.body.role
   });
 
   createSendToken(newUser, 201, res);
 });
-
 
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
@@ -91,9 +91,24 @@ exports.protect = catchAsync(async (req, res, next) => {
     );
   }
   // 4) Check if user changed password after the token was issued
- 
+  if (currentUser.changedPasswordAfter(decoded.iat)) {
+    return next(new AppError('User recently changed password!', 401));
+  }
 
   // GRANT ACCESS TO PROTECTED ROUTE
   req.user = currentUser;
   next();
 });
+
+// eslint-disable-next-line arrow-body-style
+exports.restrictTO = (...roles) => {
+  return (req, res, next) => {
+
+    if (!roles.includes(req.user.role)) {
+      return next(
+        new AppError('You do not have permission to perform this action', 403)
+      );
+    }
+    next();
+  };
+};

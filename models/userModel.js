@@ -9,7 +9,6 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: [true, 'A tour must have a name'],
     maxlength: [40, 'O nome não pode ser maior que 40 caracteres'],
-    minlength: [10, 'O Nome não pode ser menor que 10 caracteres'],
   },
 
   email: {
@@ -21,6 +20,11 @@ const userSchema = new mongoose.Schema({
   },
 
   photo: String,
+  role: {
+    type: String,
+    enum: ['user', 'guide', 'lead-guide', 'admin'],
+    default: 'user'
+  },
 
   password: {
     type: String,
@@ -40,6 +44,7 @@ const userSchema = new mongoose.Schema({
       message: 'Passwords are not the same',
     },
   },
+  passwordChangedAt: Date,
 });
 
 userSchema.pre('save', async function (next) {
@@ -57,6 +62,18 @@ userSchema.methods.correctPassword = async function (
   userPassword
 ) {
   return await bcrypt.compare(candidatePassword, userPassword);
+};
+
+userSchema.methods.changedPasswordAfter = function (JTWTimestamp) {
+  if (this.passwordChangedAt) {
+    const chanedTimestamp = parseInt(
+      this.passwordChangedAt.getTime() / 1000,
+      10
+    );
+    return JTWTimestamp < chanedTimestamp;
+  }
+  //false not meas not changed
+  return false;
 };
 
 const User = mongoose.model('User', userSchema);
