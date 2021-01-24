@@ -152,7 +152,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   }
 });
 
-exports.resetPassword = async (req, res, next) => {
+exports.resetPassword = catchAsync( async (req, res, next) => {
   // 1 Get user based on the token
   const hashedToken = crypto
     .createHash('sha256')
@@ -165,21 +165,32 @@ exports.resetPassword = async (req, res, next) => {
   });
 
   // 2 If Token has not expired, and there is user, set the new password
-  if (!user){
-    return next (new AppError('Token is invalid or hs expired',400))
+  if (!user) {
+    return next(new AppError('Token is invalid or hs expired', 400));
   }
   user.password = req.body.password;
   user.passwordConfirm = req.body.passwordConfirm;
-  user.passwordResetToken= undefined;
+  user.passwordResetToken = undefined;
   user.passwordResetExpires = undefined;
   await user.save();
   // 3 Update ChagedPassword
 
   // 4 log the user
-  const token = signToken(user._id);
-  
-  res.status(200).json({
-    status:'success',
-    token
-  });
-};
+  createSendToken(user, 200, res);
+
+});
+exports.updatePassword=catchAsync( async (req, res, next)=>{
+  // 1 get user from collection
+  const user = await User.findById(req.user.id).select('+password');
+  // 2 check if POSTed current password is correct
+  if (!(user.correctPassword(req.body.passwordCurrent,user.password))){
+    return next (new AppError('Sua senha Atual está errada',401))
+  }
+  // 3 If so, update password
+  user.password = req.body.password;
+  user.passwordConfirm= req.body.passwordConfirm;
+  await user.save();
+  // 4 Log user in, send JWT
+  createSendToken(user, 200, res);
+
+});
