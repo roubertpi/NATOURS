@@ -6,6 +6,7 @@ const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 const sendEmail = require('../utils/email');
 
+
 // eslint-disable-next-line arrow-body-style
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
