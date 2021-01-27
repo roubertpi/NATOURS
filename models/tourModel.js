@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const slugify = require('slugify');
-const validator = require('validator');
-const User = require('./userModel');
+//const validator = require('validator');
+//const User = require('./userModel');
 
 const tourSchema = new mongoose.Schema(
   {
@@ -11,7 +11,7 @@ const tourSchema = new mongoose.Schema(
       unique: true,
       trim: true,
       maxlength: [40, 'O nome não pode ser maior que 40 caracteres'],
-      minlength: [10, 'O Nome não pode ser menor que 10 caracteres']
+      minlength: [10, 'O Nome não pode ser menor que 10 caracteres'],
     },
     slug: String,
     duration: {
@@ -46,14 +46,12 @@ const tourSchema = new mongoose.Schema(
     },
     priceDiscont: {
       type: Number,
-      validate: 
-      {
-        validator:function (val) {
-          return val<this.price; // 10<200
+      validate: {
+        validator: function (val) {
+          return val < this.price; // 10<200
         },
-        message:'Discount Price ({VALUE}) deve ser menor que o preço '
-      }
-      
+        message: 'Discount Price ({VALUE}) deve ser menor que o preço ',
+      },
     },
 
     summary: {
@@ -80,32 +78,36 @@ const tourSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    startlocation:{
+    startlocation: {
       // GeoJson
-      type:{
-
-        type:String,
-        default:'Point',
-        enum: ['Point']
+      type: {
+        type: String,
+        default: 'Point',
+        enum: ['Point'],
       },
-      coordinates:[Number],
-      addres:String,
-      description: String
+      coordinates: [Number],
+      addres: String,
+      description: String,
     },
-    locations:[
+    locations: [
       {
-        type:{
-          type:String,
-          default:'Point',
-          enun:['Point']
+        type: {
+          type: String,
+          default: 'Point',
+          enun: ['Point'],
         },
-        coordinates:[Number],
-        address:String,
-        description:String,
-        day:Number
-      }
+        coordinates: [Number],
+        address: String,
+        description: String,
+        day: Number,
+      },
     ],
-    guides: Array
+    guides: [
+      {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+      },
+    ],
   },
   {
     toJSON: { virtuals: true },
@@ -123,12 +125,11 @@ tourSchema.pre('save', function (next) {
   next();
 });
 
-
-tourSchema.pre('save',async function(next){
- const guidesPromises = this.guides.map(async id=> await User.findById(id));
- this.guides = await Promise.all(guidesPromises);
- next();
-});
+//tourSchema.pre('save',async function(next){
+//const guidesPromises = this.guides.map(async id=> await User.findById(id));
+//this.guides = await Promise.all(guidesPromises);
+//next();
+//});
 
 // QUERY MIDDLEWARE
 // eslint-disable-next-line prefer-arrow-callback
