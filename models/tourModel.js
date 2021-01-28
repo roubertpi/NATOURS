@@ -108,6 +108,7 @@ const tourSchema = new mongoose.Schema(
         ref: 'User',
       },
     ],
+   
   },
   {
     toJSON: { virtuals: true },
@@ -118,6 +119,12 @@ const tourSchema = new mongoose.Schema(
 // DOCUMENT MIDDLEWARE: runs before .save() and .create()
 tourSchema.virtual('durationWeeks').get(function () {
   return this.duration / 7;
+});
+// Virtual Populate
+tourSchema.virtual('reviews',{
+  ref: 'Review',
+  foreignField:'tour',
+  localField: '_id'
 });
 
 tourSchema.pre('save', function (next) {
@@ -140,20 +147,18 @@ tourSchema.pre(/^find/, function (next) {
   next();
 });
 
-tourSchema.pre(/^find/, function(next) {
-  
+tourSchema.pre(/^find/, function (next) {
   this.populate({
     path: 'guides',
-    select: '-__v -passwordChangeAt'
+    select: '-__v -passwordChangeAt',
   });
   next();
-})
+});
 
 tourSchema.post(/^find/, function (docs, next) {
   console.log(`Query took ${Date.now() - this.start} milliseconds!`);
   next();
 });
-
 
 tourSchema.pre('aggregate', function (next) {
   this.pipeline().unshift({ $match: { secrectTour: { $ne: true } } });
