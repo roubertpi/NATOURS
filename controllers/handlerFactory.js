@@ -69,7 +69,7 @@ catchAsync(async (req, res, next) => {
     .sort()
     .limitFields()
     .paginate();
-  const doc = await features.query;
+  const doc = await features.query.explain();
   //Send Responde
   res.status(200).json({
     status: 'success',

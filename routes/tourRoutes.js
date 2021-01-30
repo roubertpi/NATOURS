@@ -22,7 +22,7 @@ router
 
 router
   .route('/')
-  .get(authController.protect, tourController.getAllTours)
+  .get(tourController.getAllTours)
   .post(
     authController.protect,
     authController.restrictTO('admin', 'lead-guide'),
