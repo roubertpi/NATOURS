@@ -36,7 +36,6 @@ mongoose
           console.log(err);
       }
       process.exit();
-
   };
 
   // Delete all Data From DB
@@ -51,7 +50,8 @@ mongoose
         console.log(err);
     }
     process.exit();
-}
+};
+
 if (process.argv[2]==='--import'){
     importData()
 }else if (process.argv[2]==='--delete') {
