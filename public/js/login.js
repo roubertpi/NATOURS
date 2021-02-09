@@ -9,10 +9,11 @@ export const login = async (email, password) => {
       url: 'http://127.0.0.1:3000/api/v1/users/login',
       data: {
         email,
-        password
+        password,
+        withCredentials: true
       }
     });
-
+    document.cookie=`jwt`
     if (res.data.status === 'success') {
       showAlert('success', 'Logged in successfully!');
       window.setTimeout(() => {
@@ -20,7 +21,7 @@ export const login = async (email, password) => {
       }, 1500);
     }
   } catch (err) {
-    showAlert('error', err.response.data.message);
+    console.log(error.response.data);
   }
 };
 
@@ -36,3 +37,4 @@ export const logout = async () => {
     showAlert('error', 'Error logging out! Try again.');
   }
 };
+

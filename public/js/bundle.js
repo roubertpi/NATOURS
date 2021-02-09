@@ -8346,12 +8346,14 @@ var login = /*#__PURE__*/function () {
               url: 'http://127.0.0.1:3000/api/v1/users/login',
               data: {
                 email: email,
-                password: password
+                password: password,
+                withCredentials: true
               }
             });
 
           case 3:
             res = _context.sent;
+            document.cookie = "jwt";
 
             if (res.data.status === 'success') {
               (0, _alerts.showAlert)('success', 'Logged in successfully!');
@@ -8360,20 +8362,20 @@ var login = /*#__PURE__*/function () {
               }, 1500);
             }
 
-            _context.next = 10;
+            _context.next = 11;
             break;
 
-          case 7:
-            _context.prev = 7;
+          case 8:
+            _context.prev = 8;
             _context.t0 = _context["catch"](0);
-            (0, _alerts.showAlert)('error', _context.t0.response.data.message);
+            console.log(error.response.data);
 
-          case 10:
+          case 11:
           case "end":
             return _context.stop();
         }
       }
-    }, _callee, null, [[0, 7]]);
+    }, _callee, null, [[0, 8]]);
   }));
 
   return function login(_x, _x2) {
@@ -8849,7 +8851,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50830" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "62691" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
@@ -9026,4 +9028,4 @@ function hmrAcceptRun(bundle, id) {
   }
 }
 },{}]},{},["../../node_modules/parcel-bundler/src/builtins/hmr-runtime.js","index.js"], null)
-//# sourceMappingURL=/bundle.js.map
+//# sourceMappingURL=/js/bundle.js.map
