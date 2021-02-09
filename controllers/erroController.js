@@ -22,37 +22,59 @@ const handleValidationErrorDB = (err) => {
 const handleJWTError = () =>
   new AppError('Invalid token. Please log in again!', 401);
 
-
 const handleJWTExpiredError = () =>
   new AppError('Your token has expired! Please log in again.', 401);
-const sendErrorDev = (err, res) => {
-  res.status(err.statusCode).json({
-    status: err.status,
-    error: err,
-    message: err.message,
-    stack: err.stack,
+
+const sendErrorDev = (err, req, res) => {
+  // A) API
+  if (req.originalUrl.startsWith('/api')) {
+    return res.status(err.statusCode).json({
+      status: err.status,
+      error: err,
+      message: err.message,
+      stack: err.stack,
+    });
+  }
+  // B) Rendered WebSite
+  console.error('ERROR 💥', err);
+  return res.status(err.statusCode).render('error', {
+    title: 'Tem algo erro',
+    msg: err.message,
   });
 };
 
-const sendErrorProd = (err, res) => {
-  // Operational, trusted error: send message to client
-  if (err.isOperational) {
-    res.status(err.statusCode).json({
-      status: err.status,
-      message: err.message
-    });
-
-    // Programming or other unknown error: don't leak error details
-  } else {
+const sendErrorProd = (err, req, res) => {
+  // A) API
+  if (req.originalUrl.startsWith('/api')) {
+    // Operational, trusted error: send message to client
+    if (err.isOperational) {
+      return res.status(err.statusCode).json({
+        status: err.status,
+        message: err.message,
+      });
+      // Programming or other unknown error: don't leak error details
+    }
     // 1) Log error
     console.error('ERROR 💥', err);
-
     // 2) Send generic message
-    res.status(500).json({
+    return res.status(500).json({
       status: 'error',
-      message: err
+      message: err,
     });
   }
+  // B) Rendered Website
+  if (err.isOperational) {
+    return res.status(err.statusCode).render('error', {
+      status: 'Tem algo Errado',
+      msg: err.message,
+    });
+    // Programming or other unknown error: don't leak error details
+  }
+  console.error('ERROR 💥', err);
+  res.status(500).json({
+    status: 'Tem Boi na linha ',
+    msg: 'Por favor Tente Mais Tarde',
+  });
 };
 
 module.exports = (err, req, res, next) => {
@@ -60,9 +82,9 @@ module.exports = (err, req, res, next) => {
 
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
-  
+
   if (process.env.NODE_ENV === 'development') {
-    sendErrorDev(err, res);
+    sendErrorDev(err, req, res);
   } else if (process.env.NODE_ENV === 'production') {
     //let error = { ...err };
 
@@ -74,6 +96,6 @@ module.exports = (err, req, res, next) => {
     if (err.name === 'JsonWebTokenError') err = handleJWTError(err);
     if (err.name === 'TokenExpiredError') err = handleJWTExpiredError();
 
-    sendErrorProd(err, res);
+    sendErrorProd(err, req, res);
   }
 };
