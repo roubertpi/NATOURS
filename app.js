@@ -34,7 +34,7 @@ app.use(
     credentials: true,
     origin: 'http://127.0.0.1'
   })
-); 
+);
 app.options('*',cors());
 
 
@@ -53,6 +53,7 @@ app.use('/api', limiter);
 
 // Body passer, reading data from body into req req.body
 app.use(express.json({ limit: '10kb' }));
+app.use (express.urlencoded({ extended:true, limit: '10kb'}))
 app.use(cookieParser());
 
 
