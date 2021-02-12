@@ -20,11 +20,13 @@ const userSchema = new mongoose.Schema({
     validate: [validator.isEmail, 'Um email valido'],
   },
 
-  photo: String,
+  photo: {
+     type: String,
+     default: 'default.jpg' },
   role: {
     type: String,
     enum: ['user', 'guide', 'lead-guide', 'admin'],
-    default: 'user'
+    default: 'user',
   },
 
   password: {
@@ -48,11 +50,11 @@ const userSchema = new mongoose.Schema({
   passwordChangedAt: Date,
   passwordResetToken: String,
   passwordResetExpires: Date,
-  active:{
-    type:Boolean,
+  active: {
+    type: Boolean,
     default: true,
     select: false,
-  }
+  },
 });
 
 userSchema.pre('save', async function (next) {
@@ -65,18 +67,17 @@ userSchema.pre('save', async function (next) {
   next();
 });
 
-userSchema.pre('save',function(next){
-  if (!this.isModified('password')|| this.isNew) return next();
+userSchema.pre('save', function (next) {
+  if (!this.isModified('password') || this.isNew) return next();
 
   this.passwordChangedAt = Date.now() - 1000;
   next();
 });
 
-userSchema.pre(/^find/,function(next){
-  
+userSchema.pre(/^find/, function (next) {
   // Este é o ponto da tabela atual
-  this.find ({active:{$ne:false }});
-  next(); 
+  this.find({ active: { $ne: false } });
+  next();
 });
 
 userSchema.methods.correctPassword = async function (
@@ -97,7 +98,7 @@ userSchema.methods.changedPasswordAfter = function (JTWTimestamp) {
   //false not meas not changed
   return false;
 };
-userSchema.methods.createPasswordResetToken = function() {
+userSchema.methods.createPasswordResetToken = function () {
   const resetToken = crypto.randomBytes(32).toString('hex');
 
   this.passwordResetToken = crypto
@@ -111,7 +112,6 @@ userSchema.methods.createPasswordResetToken = function() {
 
   return resetToken;
 };
-
 
 const User = mongoose.model('User', userSchema);
 

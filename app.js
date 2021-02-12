@@ -84,7 +84,6 @@ app.use(
 app.use((req, res, next) => {
   req.requestTime = new Date().toString();
   // eslint-disable-next-line no-console
-  console.log(req.cookies)
   next();
 });
 

@@ -1,4 +1,5 @@
 const express = require('express');
+const multer = require('multer');
 const userController = require('../controllers/userControler');
 const authController = require('../controllers/authController');
 
@@ -13,13 +14,17 @@ router.patch('/resetPassword/:token', authController.resetPassword);
 // o que estiver abaixo não precisa implementar protect
 router.use(authController.protect);
 
-router.patch('/updateMyPassword',authController.updatePassword);
-router.get('/me',userController.getMe,userController.getUser);
-router.patch('/updateMe',  userController.updateme);
+router.patch('/updateMyPassword', authController.updatePassword);
+router.get('/me', userController.getMe, userController.getUser);
+router.patch(
+  '/updateMe',
+  userController.uploadUserPhoto,
+  userController.resizeUserPhoto,
+  userController.updateme
+);
 router.delete('/deleteMe', authController.protect, userController.deleteMe);
 
-
-router.use (authController.restrictTO('admin'));
+router.use(authController.restrictTO('admin'));
 router
   .route('/')
   .get(userController.getAllUsers)
