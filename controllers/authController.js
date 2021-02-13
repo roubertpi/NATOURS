@@ -4,7 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
-const sendEmail = require('../utils/email');
+const Email = require('../utils/email');
 
 // eslint-disable-next-line arrow-body-style
 const signToken = (id) => {
@@ -37,13 +37,11 @@ const createSendToken = (user, statusCode, res) => {
   });
 };
 exports.signup = catchAsync(async (req, res, next) => {
-  const newUser = await User.create({
-    name: req.body.name,
-    email: req.body.email,
-    password: req.body.password,
-    passwordConfirm: req.body.passwordConfirm,
-    role: req.body.role,
-  });
+  const newUser = await User.create(req.body);
+
+  const url = `${req.protocol}://${req.get('host')}/me` ;
+  console.log(url)
+  await new Email(newUser, url).sendWelcome();
 
   createSendToken(newUser, 201, res);
 });
@@ -124,7 +122,7 @@ exports.isLoggedIn = catchAsync(async (req, res, next) => {
         req.cookies.jwt,
         process.env.JWT_SECRET
       );
-  
+
       // 2) Check if user still exists
       const currentUser = await User.findById(decoded.id);
       if (!currentUser) {
@@ -134,14 +132,14 @@ exports.isLoggedIn = catchAsync(async (req, res, next) => {
       if (currentUser.changedPasswordAfter(decoded.iat)) {
         return next();
       }
-  
+
       // There is a Logged In user
       res.locals.user= currentUser;
       return next();
     }catch(err){
       return next();
     }
-    
+
   }
   next();
 });
@@ -177,11 +175,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
 
   try {
-    await sendEmail({
-      email: user.email,
-      subject: 'Your password reset token (valid for 10 min)',
-      message,
-    });
+
 
     res.status(200).json({
       status: 'success',
