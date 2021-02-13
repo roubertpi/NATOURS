@@ -39,8 +39,8 @@ const createSendToken = (user, statusCode, res) => {
 exports.signup = catchAsync(async (req, res, next) => {
   const newUser = await User.create(req.body);
 
-  const url = `${req.protocol}://${req.get('host')}/me` ;
-  console.log(url)
+  const url = `${req.protocol}://${req.get('host')}/me`;
+  console.log(url);
   await new Email(newUser, url).sendWelcome();
 
   createSendToken(newUser, 201, res);
@@ -64,13 +64,13 @@ exports.login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
-exports.logout = (req, res)=>{
-  res.cookie('jwt','loggedout',{
-    expires: new Date(Date.now() + 10 *1000),
-    httpOnly:true
+exports.logout = (req, res) => {
+  res.cookie('jwt', 'loggedout', {
+    expires: new Date(Date.now() + 10 * 1000),
+    httpOnly: true,
   });
-  res.status(200).json({status:'success'});
-}
+  res.status(200).json({ status: 'success' });
+};
 
 exports.protect = catchAsync(async (req, res, next) => {
   // 1) Getting token and check of it's there
@@ -109,7 +109,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 
   // GRANT ACCESS TO PROTECTED ROUTE
   req.user = currentUser;
-  res.locals.user= currentUser;
+  res.locals.user = currentUser;
   next();
 });
 
@@ -117,7 +117,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 exports.isLoggedIn = catchAsync(async (req, res, next) => {
   // 1)verifica token
   if (req.cookies.jwt) {
-    try{
+    try {
       const decoded = await promisify(jwt.verify)(
         req.cookies.jwt,
         process.env.JWT_SECRET
@@ -134,12 +134,11 @@ exports.isLoggedIn = catchAsync(async (req, res, next) => {
       }
 
       // There is a Logged In user
-      res.locals.user= currentUser;
+      res.locals.user = currentUser;
       return next();
-    }catch(err){
+    } catch (err) {
       return next();
     }
-
   }
   next();
 });
@@ -168,14 +167,11 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   await user.save({ validateBeforeSave: false });
 
   // 3) Send it to user's email
-  const resetURL = `${req.protocol}://${req.get(
-    'host'
-  )}/api/v1/users/resetPassword/${resetToken}`;
-
-  const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email!`;
-
   try {
+    const resetURL = `${req.protocol}://${req.get('host')}
+    /api/v1/users/resetPassword/${resetToken}`;
 
+    await new Email(user, resetURL).sendPasswordReset();
 
     res.status(200).json({
       status: 'success',
