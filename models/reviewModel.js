@@ -65,8 +65,6 @@ reviewSchema.statics.calcAverageRatings = async function(tourId) {
       }
     }
   ]);
-  console.log(stats);
-
   if (stats.length > 0) {
     await Tour.findByIdAndUpdate(tourId, {
       ratingsQuantity: stats[0].nRating,
@@ -142,7 +140,7 @@ reviewSchema.pre(/^findOneAnd/, async function(next){
 reviewSchema.post('save',function(){
   // this points to current review
   this.constructor.calcAverageRatings(this.tour);
- 
+
 });
 
 const Review = mongoose.model('Review', reviewSchema);
