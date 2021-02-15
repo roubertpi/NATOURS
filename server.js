@@ -9,7 +9,7 @@ process.on('uncaughtException', err => {
   process.exit(1);
 });
 
-const DB = process.env.Database.replace(
+const DB = process.env.DATABASE.replace(
   '<PASSWORD>',
   process.env.DATABASE_PASSWORD
 );
