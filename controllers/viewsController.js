@@ -34,7 +34,6 @@ exports.getTour = catchAsync(async (req, res, next) => {
   if (!tour) {
     return next(new AppError('There is no tour with that name.', 404));
   }
-
   // 2) Build template
   // 3) Render template using data from 1)
   res.status(200).render('tour', {
@@ -48,6 +47,13 @@ exports.getLoginForm = (req, res) => {
     title: 'Log into your account'
   });
 };
+
+exports.getCadastra = (req, res) => {
+  res.status(200).render('cadastrar', {
+    title: 'Cadastrar'
+  });
+};
+
 
 exports.getAccount = (req, res) => {
   res.status(200).render('account', {
